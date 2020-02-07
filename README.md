@@ -1,2 +1,2 @@
 # springboot-mongodb
- Springboot Mongodb crud Poc 
+Playing arround with CRUD operations on a Mongodb database using Spring-data-mongodb.
