@@ -1,7 +1,7 @@
 package com.mbouhda.mongo.controller;
 
 import com.mbouhda.mongo.model.LegoSet;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import com.mbouhda.mongo.repository.LegoSetRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,19 +10,29 @@ import java.util.List;
 @RequestMapping("api/lego")
 public class LegoController {
 
-    private MongoTemplate mongoTemplate;
+    private LegoSetRepository repository;
 
-    public LegoController(MongoTemplate mongoTemplate) {
-        this.mongoTemplate = mongoTemplate;
+    public LegoController(LegoSetRepository repository) {
+        this.repository = repository;
+    }
+
+    @GetMapping("/all")
+    List<LegoSet> getAll() {
+        return repository.findAll();
     }
 
     @PostMapping
     void insert(@RequestBody LegoSet legoSet) {
-        mongoTemplate.insert(legoSet);
+        repository.insert(legoSet);
     }
 
-    @GetMapping
-    List<LegoSet> getAll() {
-        return mongoTemplate.findAll(LegoSet.class);
+    @PutMapping
+    void update(@RequestBody LegoSet legoSet) {
+        repository.save(legoSet);
+    }
+
+    @DeleteMapping("/{id}")
+    void delete(@PathVariable String id) {
+        repository.deleteById(id);
     }
 }
