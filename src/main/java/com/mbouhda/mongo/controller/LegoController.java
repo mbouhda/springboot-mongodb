@@ -1,7 +1,11 @@
 package com.mbouhda.mongo.controller;
 
 import com.mbouhda.mongo.model.LegoSet;
+import com.mbouhda.mongo.model.QLegoSet;
 import com.mbouhda.mongo.repository.LegoSetRepository;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +22,8 @@ public class LegoController {
 
     @GetMapping("/all")
     List<LegoSet> getAll() {
-        return repository.findAll();
+        Sort sortByThemeAsc = Sort.by("theme").ascending();
+        return repository.findAll(sortByThemeAsc);
     }
 
     @PostMapping
@@ -35,4 +40,35 @@ public class LegoController {
     void delete(@PathVariable String id) {
         repository.deleteById(id);
     }
+
+    @GetMapping("/{id}")
+    LegoSet byId(@PathVariable String id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    @GetMapping("/byTheme/{theme}")
+    List<LegoSet> allByTheme(@PathVariable String theme) {
+        return repository.findAllByThemeContains(theme);
+    }
+
+    @GetMapping("/byDeliveryFeeLessThan/{fee}")
+    List<LegoSet> byDeliveryFeeLessThan(@PathVariable int fee) {
+        return repository.findByDeliveryFeeLessThan(fee);
+    }
+
+    @GetMapping("/all/bestSoldSets")
+    List<LegoSet> getBestSets() {
+        QLegoSet legoSet = new QLegoSet("query");
+
+        Predicate isInStock = legoSet.deliveryInfo.inStock.isTrue();
+        Predicate deliveryFeeFilter = legoSet.deliveryInfo.deliveryFee.lt(4);
+        Predicate hasGoodReviews = legoSet.reviews.any().rating.between(7, 10);
+
+        Predicate bestSetsFilter = ((BooleanExpression) isInStock)
+                .and(deliveryFeeFilter)
+                .and(hasGoodReviews);
+
+        return (List<LegoSet>) repository.findAll(bestSetsFilter);
+    }
+
 }
