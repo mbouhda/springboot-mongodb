@@ -4,10 +4,10 @@ import com.mbouhda.mongo.model.DeliveryInfo;
 import com.mbouhda.mongo.model.LegoSet;
 import com.mbouhda.mongo.model.LegoSetDifficulty;
 import com.mbouhda.mongo.model.ProductReview;
+import com.mbouhda.mongo.repository.LegoSetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -19,16 +19,16 @@ public class PopulateDB implements CommandLineRunner {
 
     private final static Logger LOG = LoggerFactory.getLogger(PopulateDB.class);
 
-    private MongoTemplate mongoTemplate;
+    private LegoSetRepository repository;
 
-    public PopulateDB(MongoTemplate mongoTemplate) {
-        this.mongoTemplate = mongoTemplate;
+    public PopulateDB(LegoSetRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public void run(String... args) throws Exception {
 
-        mongoTemplate.dropCollection(LegoSet.class);
+        repository.deleteAll();
         LOG.info("Legoset database was cleaned.");
 
         LegoSet car = LegoSet.builder()
@@ -59,7 +59,7 @@ public class PopulateDB implements CommandLineRunner {
                 .build();
 
         List<LegoSet> legoSets = Arrays.asList(car, scooter, fighter);
-        mongoTemplate.insertAll(legoSets);
+        repository.insert(legoSets);
         LOG.info("Legoset database was populated.");
     }
 }
